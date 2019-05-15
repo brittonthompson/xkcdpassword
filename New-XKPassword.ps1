@@ -88,7 +88,7 @@ function New-XKPassword {
     
     if(-not $DictionaryFile){
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $DictionaryFile = (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/1db189a4077267e067e6785943640b1bf82c1f51/words.csv").Content
+        $DictionaryFile = Import-CSV (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/1db189a4077267e067e6785943640b1bf82c1f51/words.csv").Content
     }
 
     if (Test-Path $DictionaryFile) {
