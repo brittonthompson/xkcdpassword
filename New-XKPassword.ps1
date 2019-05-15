@@ -83,9 +83,14 @@ function New-XKPassword {
         [int]$MaxWordLength = 8,
         [ValidateRange(1, 24)]        
         [int]$WordCount = 3, 
-        [string]$DictionaryFile = "words.csv"
+        [string]$DictionaryFile
     )
     
+    if(-not $DictionaryFile){
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $DictionaryFile = (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/1db189a4077267e067e6785943640b1bf82c1f51/words.csv").Content
+    }
+
     if (Test-Path $DictionaryFile) {
         #Check to see if the fast search assembly is loaded
         #Fast search usesa C# type definition included in the common.ps1
