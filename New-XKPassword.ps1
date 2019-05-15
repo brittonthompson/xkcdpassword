@@ -83,7 +83,7 @@ function New-XKPassword {
         [int]$MaxWordLength = 8,
         [ValidateRange(1, 24)]        
         [int]$WordCount = 3, 
-        [string]$DictionaryFile ="words.csv"
+        [string]$DictionaryFile = "words.csv"
     )
     
     if (Test-Path $DictionaryFile) {
@@ -114,7 +114,7 @@ function New-XKPassword {
         }
     
         #Generate the formatted password with symbols and numbers
-        $Symbols = @('!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '~')
+        $Symbols = @("!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "~")
 
         #Get a random symbol and double it for the first and last characters in the password
         $Outside = Get-Random -InputObject $Symbols
@@ -143,5 +143,3 @@ function New-XKPassword {
         throw "Your dictionary file path is not valid"
     }
 }
-
-New-XKPassword
