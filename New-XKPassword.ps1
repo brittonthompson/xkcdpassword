@@ -83,12 +83,12 @@ function New-XKPassword {
         [int]$MaxWordLength = 8,
         [ValidateRange(1, 24)]        
         [int]$WordCount = 3, 
-        [string]$DictionaryFile
+        [string]$DictionaryFile = "words.csv"
     )
     
     if(-not $DictionaryFile){
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $DictionaryFile = Import-CSV (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/1db189a4077267e067e6785943640b1bf82c1f51/words.csv").Content
+        $DictionaryFile = (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/master/words.json").Content
     }
 
     if (Test-Path $DictionaryFile) {
