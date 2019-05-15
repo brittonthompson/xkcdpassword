@@ -63,7 +63,7 @@ function New-XKPassword {
         While testing and creating the function the most common 1000 English words were used from https://www.ef.edu/english-resources/english-vocabulary/top-1000-words.
         The CSV is two columns, Word and StringLength, where the StringLength column is the number of letters in the Word column.
     .PARAMETER DictionaryFile
-        Full path to the csv dictionary.
+        Full path to the csv dictionary. Leave blank and the json dictionary will be pulled from the repo.
     .PARAMETER MinWordLength
         The minimum length of any given word defaults to 4 and will never be shorter than this number.
     .PARAMETER MaxWordLength
@@ -77,30 +77,42 @@ function New-XKPassword {
     [cmdletBinding()]
     [OutputType([string])]
     param( 
-        [ValidateRange(1, 9)]
+        [ValidateRange(1, 14)]
         [int]$MinWordLength = 4,
-        [ValidateRange(1, 9)]        
+        [ValidateRange(1, 14)]        
         [int]$MaxWordLength = 8,
         [ValidateRange(1, 24)]        
         [int]$WordCount = 3, 
-        [string]$DictionaryFile = "words.csv"
+        [string]$DictionaryFile
     )
     
-    if(-not $DictionaryFile){
+    #Check the dictionary file path
+    if($DictionaryFile){ $IsGoodFilePath = Test-Path $DictionaryFile -ErrorAction SilentlyContinue } else { $IsGoodFilePath = $False }
+
+    #If no dictionary file is present pull it from the repo
+    if(-not $IsGoodFilePath) {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $DictionaryFile = (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/master/words.json").Content
+        $Dictionary = (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/master/words.json").Content | ConvertFrom-Json
     }
 
-    if (Test-Path $DictionaryFile) {
+    #Throw and error if there's no dictionary
+    if ($IsGoodFilePath -or $Dictionary) {
         #Check to see if the fast search assembly is loaded
         #Fast search usesa C# type definition included in the common.ps1
         if (Get-Command "Start-FastSearch" -errorAction SilentlyContinue) { $FastSearch = $True }
     
-        #Get the dictionary file so we can get the max and min length if different from given
-        $Dictionary = Import-Csv -Path $DictionaryFile
+        #Get the dictionary file if we supplied one in json or csv format
+        if (-not $Dictionary) { 
+            $Extension = (Get-Item $DictionaryFile).Extension
+            switch ($Extension) {
+                ".csv" { $Dictionary = Import-Csv -Path $DictionaryFile }
+                ".json" { $Dictionary = Get-Content $DictionaryFile | ConvertFrom-Json }
+                default { throw "Your dictionary file must be in CSV or JSON format"; break }
+            }
+        }
 
         #Get an ordered list of all the lengths so we can make sure we don't try to pick a word of length that doesn't exist
-        $WordLengths = $Dictionary.StringLength | Select-Object -Unique | Where-Object { $_ -ge $MinWordLength -and $_ -le $MaxWordLength }
+        $WordLengths = $Dictionary.StringLength | Select-Object -Unique | Where-Object { [int]$_ -ge $MinWordLength -and [int]$_ -le $MaxWordLength }
 
         #Create a list of random word lengths
         $Lengths = @()
