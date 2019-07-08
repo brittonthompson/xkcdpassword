@@ -92,7 +92,7 @@ function New-XKPassword {
     #If no dictionary file is present pull it from the repo
     if(-not $IsGoodFilePath) {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $Dictionary = (Invoke-WebRequest "https://bitbucket.org/1path-bthompson/xkcdpassword/raw/master/words.json").Content | ConvertFrom-Json
+        $Dictionary = (Invoke-WebRequest "https://raw.githubusercontent.com/brittonthompson/xkcdpassword/master/words.json").Content | ConvertFrom-Json
     }
 
     #Throw and error if there's no dictionary
